@@ -3,7 +3,12 @@ import { exec } from "child_process";
 import { EventEmitter } from "stream";
 const socket = new Socket();
 
-socket.connect(3000, "localhost", () => {
+// take port and host from command line arguments
+const port = parseInt(process.argv[2]) || 3000;
+const host = process.argv[3] || "localhost";
+
+
+socket.connect(port, host, () => {
     console.log("Connected to server");
 });
 
