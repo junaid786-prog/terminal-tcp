@@ -3,7 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const net_1 = require("net");
 const child_process_1 = require("child_process");
 const socket = new net_1.Socket();
-socket.connect(3000, "localhost", () => {
+// take port and host from command line arguments
+const port = parseInt(process.argv[2]) || 3000;
+const host = process.argv[3] || "localhost";
+socket.connect(port, host, () => {
     console.log("Connected to server");
 });
 socket.on("data", (data) => {
