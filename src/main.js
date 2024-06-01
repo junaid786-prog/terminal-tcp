@@ -13,4 +13,8 @@ let a = verifySignature(
   message,
 );
 
+// installation -- generate public and private key, uuid and save it in a file
+// register --  send public key to server and get public key from server
+// connect .. send public key
+//
 console.log(a);
