@@ -5,14 +5,12 @@
 import readLine from "readline";
 
 const rl = readLine.createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
+  output: process.stdout,
 });
 
 // console.log("Terminal process started");
 // console.log("PID:", process.pid);
-
-
 
 // process.stdin.setEncoding("utf-8");
 // process.stdin.resume();
@@ -32,17 +30,18 @@ const rl = readLine.createInterface({
 // });
 
 var waitForUserInput = function () {
-    rl.on("line", function (line) {
-        console.log("Received:", line);
-        if (process.send) {
-            process.send(line, function (error: any) {
-                console.log("Sending data to main thread");
-                
-                if (error) {
-                    console.error("Error:", error);
-                }
-            });
+  rl.on("line", function (line) {
+    console.log("Received:", line);
+    if (process.send) {
+      process.send(line, function (error: any) {
+        console.log("Sending data to main thread");
+
+        if (error) {
+          console.error("Error:", error);
         }
-    });
+      });
+    }
+  });
 };
 waitForUserInput();
+

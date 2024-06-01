@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const readline_1 = __importDefault(require("readline"));
 const rl = readline_1.default.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
 });
 // console.log("Terminal process started");
 // console.log("PID:", process.pid);
