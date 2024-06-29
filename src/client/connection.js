@@ -1,7 +1,7 @@
 const { Socket } = require("net");
 const { exec } = require("child_process");
 const { EventEmitter } = require("stream");
-const { register } = require("./setup");
+const { register, connect } = require("./setup");
 const socket = new Socket();
 
 // take port and host from command line arguments
@@ -10,7 +10,8 @@ const host = process.argv[3] || "localhost";
 
 socket.connect(port, host, () => {
   console.log("Connected to server");
-  register(socket);
+  //register(socket);
+  connect(socket);
 });
 
 socket.on("data", (data) => {

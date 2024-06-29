@@ -3,6 +3,7 @@ const { EventEmitter } = require("events");
 const { spawn } = require("child_process");
 
 const readLine = require("readline");
+const { log } = require("console");
 
 const rl = readLine.createInterface({
   input: process.stdin,
@@ -12,6 +13,8 @@ const rl = readLine.createInterface({
 const server = new Server();
 
 let clients = [];
+let connectedSockets = [];
+let connectedClients = [];
 
 class MyEventEmitter extends EventEmitter {
   connectedSockets;
@@ -54,8 +57,36 @@ eventEmitter.on("data", (data) => {
   try {
     command = JSON.parse(command);
     if (command.type === "register") {
-      console.log("Registering client with public key:", command.publicKey);
       clients.push(command);
+    } else if (command.type === "connect") {
+      let isLogggedIn = false;
+
+      clients.forEach((client) => {
+        console.log(
+          "Client:",
+          client + "/n/n\n\n\n\n\n\n\n\n\n\n" + command + "/n/n",
+        );
+
+        if (
+          client.publicKey === command.publicKey &&
+          client.uuid === command.uuid
+        ) {
+          console.log("Connecting client with public key:", command.publicKey);
+          connectedClients.push(command);
+          isLogggedIn = true;
+        } else {
+          console.log("Client not matched");
+          // socket.write("Client not registered");
+        }
+      });
+
+      if (!isLogggedIn) {
+        console.log("Client not registered");
+        // socket.write("Client not registered");
+      } else {
+        console.log("Client connected");
+        // socket.write("Client connected");
+      }
     }
   } catch (error) {
     console.error("Error parsing JSON:", error);
@@ -68,10 +99,6 @@ server.on("connection", (socket) => {
   socket.on("data", (data) => {
     eventEmitter.emit("data", data);
   });
-});
-
-server.on("data", (data) => {
-  console.log("Received:", data.toString());
 });
 
 server.listen(3000, () => {
