@@ -29,8 +29,10 @@ class SocketEventEmitter extends EventEmitter {
           }
         } else if (command.type === COMMAND_TYPE.LOGOUT) {
           //ClientsHelper.logout(command);
+        } else {
+          console.log("Unknown command");
         }
-      } catch (error) {}
+      } catch (error) { }
     });
   }
 }

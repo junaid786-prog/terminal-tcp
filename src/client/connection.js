@@ -4,6 +4,7 @@ const { EventEmitter } = require("stream");
 const { register, connect } = require("./setup");
 const socket = new Socket();
 const crypto = require("crypto");
+const { getPublicKey } = require("./helpers");
 
 // take port and host from command line arguments
 const port = parseInt(process.argv[2]) || 3000;
@@ -27,7 +28,7 @@ socket.on("data", (data) => {
   }
 
   try {
-    // command = JSON.parse(command);
+    command = JSON.parse(command);
     if (command && command?.type === "send_challenge") {
       console.log("Challenge received");
       const challenge = command.data.challenge;
@@ -35,11 +36,13 @@ socket.on("data", (data) => {
       console.log("Encrypted challenge:", encryptedChallenge);
       console.log("Challenge:", challenge);
 
+      let key = getPublicKey();
+      console.log("Public key:", key)
       const isVerified = crypto.verify(
         "sha256",
         Buffer.from(challenge),
         {
-          key: publicKey,
+          key: key,
           padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
         },
         encryptedChallenge,
@@ -51,13 +54,13 @@ socket.on("data", (data) => {
         JSON.stringify({
           type: "respond_challenge",
           data: {
-            response: challenge,
+            response: isVerified,
           },
         }),
       );
     }
   } catch (error) {
-    console.log("Error parsing JSON");
+    console.log("Error parsing JSON", error);
   }
 
   return;
