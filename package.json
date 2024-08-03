@@ -5,6 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
+    "client": "node --watch ./src/client/connection.js",
+    "server": "node --watch ./src/server/main.js",
     "start:server": "node ./dist/server.js",
     "start:client": "node ./dist/client.js"
   },

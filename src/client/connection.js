@@ -4,7 +4,7 @@ const { EventEmitter } = require("stream");
 const { register, connect } = require("./setup");
 const socket = new Socket();
 const crypto = require("crypto");
-const { getPublicKey } = require("./helpers");
+const { getPrivateKey } = require("./helpers");
 
 // take port and host from command line arguments
 const port = parseInt(process.argv[2]) || 3000;
@@ -29,26 +29,30 @@ socket.on("data", (data) => {
 
   try {
     command = JSON.parse(command);
-    if (command && command?.type === "send_challenge") {
+    if (command && command.type === "send_challenge") {
       console.log("Challenge received");
-      const challenge = command.data.challenge;
-      let encryptedChallenge = Buffer.from(challenge, "hex");
-      console.log("Encrypted challenge:", encryptedChallenge);
-      console.log("Challenge:", challenge);
+      const { challenge, encryptedChallenge } = command.data;
 
-      let key = getPublicKey();
-      console.log("Public key:", key)
-      const isVerified = crypto.verify(
-        "sha256",
-        Buffer.from(challenge),
+      // Get private key for decryption
+      let privateKey = getPrivateKey();
+
+      // Decrypt the encrypted challenge
+      let decryptedChallenge = crypto.privateDecrypt(
         {
-          key: key,
-          padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+          key: privateKey,
+          padding: crypto.constants.RSA_PKCS1_PADDING, // Ensure padding matches the server's encryption
         },
-        encryptedChallenge,
+        Buffer.from(encryptedChallenge, "hex") // Ensure this matches the server's encoding
       );
 
+      console.log("Decrypted challenge:", decryptedChallenge.toString());
+      console.log("Original challenge:", challenge);
+
+      // Compare decrypted challenge with the original challenge
+      const isVerified = decryptedChallenge.toString("utf-8") === challenge; // Ensure the encoding matches
+
       console.log("Is verified:", isVerified);
+
       // Respond to challenge
       socket.write(
         JSON.stringify({
@@ -56,15 +60,14 @@ socket.on("data", (data) => {
           data: {
             response: isVerified,
           },
-        }),
+        })
       );
     }
   } catch (error) {
     console.log("Error parsing JSON", error);
   }
 
-  return;
-
+  return ;
   let currentDirectory = process.cwd();
   if (command.startsWith("cd")) {
     console.log("Changing directory");

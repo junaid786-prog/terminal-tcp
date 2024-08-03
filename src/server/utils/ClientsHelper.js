@@ -55,23 +55,30 @@ class ClientsHelper {
   static register(command) {
     console.log("Registering client");
     // check if it is valid
-    this.clients.push(command);
+    this.clients.push({
+      publicKey: command.publicKey,
+      uuid: command.uuid,
+    });
     this.connectedClients.push(command.uuid);
   }
 }
 
 function generateChallenge(publicKey) {
-  console.log("CALLED", publicKey);
+  console.log("GENERATING CHALLENGE");
   let challenge = crypto.randomBytes(16).toString("hex");
   let encryptedChallenge = crypto.publicEncrypt(
-    publicKey,
-    Buffer.from(challenge),
+    {
+      key: publicKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING,
+    },
+    Buffer.from(challenge, "utf-8") // Ensure this matches the client's decryption encoding
   );
   console.log("Encrypted challenge:", encryptedChallenge);
 
   return {
     challenge,
-    encryptedChallenge: encryptedChallenge.toString("hex"),
+    encryptedChallenge: encryptedChallenge.toString("hex"), // Send as hex or base64
   };
 }
+
 module.exports = ClientsHelper;

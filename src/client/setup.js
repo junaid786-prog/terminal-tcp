@@ -55,7 +55,6 @@ function connect(socket) {
   // TODO: change it to command
   let data = {
     type: "connect",
-    publicKey,
     uuid,
   };
 
