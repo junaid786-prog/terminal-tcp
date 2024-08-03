@@ -1,58 +1,43 @@
-const { Server, Socket } = require("net");
-const { spawn } = require("child_process");
+const { Server } = require('net');
+const readline = require('readline');
+const socketEventEmitter = require('./events/socketEventEmitter');
+const socketService = require('./services/socketService');
 
-const readLine = require("readline");
-const SocketEventEmitter = require("./utils/SocketEventEmitter");
-const SocketManager = require("./utils/SocketManager");
-
-const rl = readLine.createInterface({
+const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
 const server = new Server();
-const eventEmitter = new SocketEventEmitter();
-const socketManager = SocketManager.getInstance();
-SocketEventEmitter.listenToEvents(eventEmitter);
 
-server.on("connection", (socket) => {
-  socketManager.addSocket(socket);
-
-  socket.on("data", (data) => {
-    console.log("Data");
-    eventEmitter.emit("data", { client: socket, data });
+server.on('connection', (socket) => {
+  socketService.addSocket(socket);
+  socket.on('data', (data) => {
+    socketEventEmitter.emit('data', { client: socket, data })
   });
+  socket.on('error', (err) => console.error('Socket error:', err));
+  socket.on('close', () => console.log('Socket closed'));
 });
 
 server.listen(3000, () => {
-  console.log("Server started on port 3000");
-  // takeDataFromTerminal();
+  console.log('Server started on port 3000');
+  promptForCommand();
 });
 
-// make a seperate thread to take data from terminal
-
-function takeDataFromTerminal() {
-  var waitForUserInput = function () {
-    rl.question("Enter command: ", function (line) {
-      console.log("Received:", line);
-      if (eventEmitter.sendData) {
-        eventEmitter.sendData(Buffer.from(line));
-      }
-      waitForUserInput();
-    });
-  };
-  waitForUserInput();
-  //const terminalProcess = spawn("node", ["/Users/apple/Documents/projects/connect/terminal.js"]);
-
-  // terminalProcess.stdout.on("data", (data: Buffer) => {
-  //     eventEmitter.getCommandData(data);
-  // });
-
-  // terminalProcess.stderr.on("data", (data: Buffer) => {
-  //     console.error("Error:", data.toString());
-  // });
-
-  // terminalProcess.on("close", (code) => {
-  //     console.log("Terminal process exited with code", code);
-  // });
+/**
+ * Prompts the user for input commands.
+ */
+function promptForCommand() {
+  rl.question('Enter command: ', (line) => {
+    if (line.trim().toLowerCase() === 'exit') {
+      rl.close();
+      server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+      });
+    } else {
+      socketService.sendData(Buffer.from(line));
+      promptForCommand();
+    }
+  });
 }

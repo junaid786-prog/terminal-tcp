@@ -52,6 +52,8 @@ function connect(socket) {
     console.log("Public key or UUID not available. Please Register First.");
     return;
   }
+
+  console.log("sent");
   // TODO: change it to command
   let data = {
     type: "connect",
