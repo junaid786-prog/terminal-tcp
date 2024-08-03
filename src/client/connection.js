@@ -1,32 +1,54 @@
 // connection.js
 
 const { Socket } = require("net");
-const { connectClient, registerClient } = require("./src/services/connectionService");
 const { handleServerResponse } = require("./src/services/challengeService");
 const { port, host } = require("./src/config/config");
-const { install } = require("./setup");
+const connection = require("./src/helpers/display");
+const ui = require("../shared/ui");
 
-// Create a new socket instance
-const socket = new Socket();
+function askUser() {
+  return ui.confirm("Do you want to connect to the server?").then((response) => {
+    console.log("Response:", response);
 
-// Connect to the server
-socket.connect(port, host, () => {
-  console.log(`Connected to server at ${host}:${port}`);
-  registerClient(socket); // Register the client
-  setTimeout(() => connectClient(socket), 3000); // Connect after registration
-});
+    if (response.confirm) {
+      connectToServer();
+    } else {
+      askUser();
+    }
+  });
+}
 
-// Handle data received from the server
-socket.on("data", (data) => {
-  handleServerResponse(data, socket);
-});
+askUser();
+function connectToServer() {
+  const socket = new Socket();
 
-// Handle socket errors
-socket.on("error", (error) => {
-  console.error("Socket error:", error);
-});
+  try {
+    // Connect to the server
+    socket.connect(port, host, () => {
+      console.log(`Connected to server at ${host}:${port}`);
+      connection.handleMainMenu(socket);
+    });
 
-// Close the socket on exit
-socket.on("close", () => {
-  console.log("Disconnected from server");
-});
+    // Handle data received from the server
+    socket.on("data", (data) => {
+      handleServerResponse(data, socket);
+    });
+
+    // Handle socket errors
+    socket.on("error", (error) => {
+      console.error("Socket error:", error);
+    });
+
+    // Close the socket on exit
+    socket.on("close", () => {
+      console.log("Disconnected from server");
+      askUser();
+    });
+  } catch (error) {
+    console.error("Error connecting to server:", error);
+  }
+}
+module.exports = {
+  connectToServer
+};
+

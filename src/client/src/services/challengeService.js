@@ -1,7 +1,8 @@
 // src/services/challengeService.js
 
 const crypto = require("crypto");
-const { getPrivateKey } = require("../helpers/getKeys");
+const { getPrivateKey, getUUID } = require("../helpers/getKeys");
+const { handleUserLoggedInMenu } = require("../helpers/display");
 
 /**
  * Handles the server response, particularly the challenge response.
@@ -34,10 +35,18 @@ function handleServerResponse(data, socket) {
           type: "respond_challenge",
           data: {
             response: isVerified,
+            uuid: getUUID(),
           },
         })
       );
+    } else if (command.type === "login_success") {
+      console.log("Logged in successfully");
+      handleUserLoggedInMenu(socket);
+    } else if (command.type === "logout_success") {
+      console.log("Logged out successfully");
+      socket.end();
     }
+
   } catch (error) {
     console.error("Error processing server response:", error);
   }

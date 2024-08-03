@@ -7,6 +7,7 @@ class ClientService {
     constructor() {
         this.clients = [];
         this.connectedClients = [];
+        this.loggedinUsers = []
     }
 
     /**
@@ -42,6 +43,54 @@ class ClientService {
 
         return responseToSend;
     }
-}
 
+    logout(command) {
+        // remove the user from the loggedinUsers array and the connectedClients array
+        if (!command.uuid) return;
+        this.loggedinUsers = this.loggedinUsers.filter(user => user !== command.uuid);
+        this.connectedClients = this.connectedClients.filter(client => client !== command.uuid);
+        return {
+            type: 'logout_success',
+            data: { uuid: command.uuid },
+        };
+    }
+    /**
+     * Responds to a challenge.
+     * @param {Object} command - The respond challenge command containing uuid and response.
+     */
+    respondChallenge(command) {
+        console.log('Responding to challenge:', command);
+        
+        let data = command.data;
+        let uuid = data.uuid;
+        let response = data.response;
+        console.log('Responding to challenge:', uuid, response, this.clients);
+        
+        let client = this.clients.find(c => c.uuid === uuid);
+
+        if (client) {
+            if (response) {
+                console.log('Client responded correctly');
+                this.loggedinUsers.push(uuid);
+                return {
+                    type: 'login_success',
+                    data: { uuid },
+                };
+            } else {
+                console.log('Client failed to respond correctly');
+                return {
+                    type: 'login_failure',
+                    data: { uuid },
+                };
+            }
+        } else {
+            console.log('Client not found:', uuid);
+            return {
+                type: 'login_failure',
+                data: { uuid },
+            };
+        }
+
+    }
+}
 module.exports = new ClientService();

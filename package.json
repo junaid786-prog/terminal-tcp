@@ -17,6 +17,7 @@
   "dependencies": {
     "@types/node": "^20.12.7",
     "crypto": "^1.0.1",
+    "inquirer": "^10.1.6",
     "uuid": "^9.0.1"
   }
 }

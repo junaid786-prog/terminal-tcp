@@ -28,8 +28,12 @@ class SocketEventEmitter extends EventEmitter {
                     const response = clientService.login(command);
                     if (response) client.write(JSON.stringify(response));
                     break;
+                case COMMAND_TYPE.RESPOND_CHALLENGE:
+                    const res = clientService.respondChallenge(command);
+                    if (res) client.write(JSON.stringify(res));
+                    break;
                 case COMMAND_TYPE.LOGOUT:
-                    // Implement logout logic
+                    clientService.logout(command);
                     break;
                 default:
                     console.log('Unknown command:', command.type);

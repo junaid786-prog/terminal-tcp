@@ -12,6 +12,7 @@ if (!fs.existsSync(keysDirectory)) {
 
 const publicKeyPath = path.join(keysDirectory, "id_rsa_pub.pem");
 const privateKeyPath = path.join(keysDirectory, "id_rsa_priv.pem");
+const uuidPath = path.join(keysDirectory, "uuid.txt");
 
 /**
  * Generates an RSA key pair and saves them to files.
@@ -43,4 +44,11 @@ function getPrivateKey() {
   return fs.readFileSync(privateKeyPath, "utf8");
 }
 
-module.exports = { generateKeyPair, getPublicKey, getPrivateKey };
+/**
+ * Retrieves the UUID from the file.
+ * @returns {string} - The UUID.
+ */
+function getUUID() {
+  return fs.readFileSync(uuidPath, "utf8");
+}
+module.exports = { generateKeyPair, getPublicKey, getPrivateKey, getUUID };
