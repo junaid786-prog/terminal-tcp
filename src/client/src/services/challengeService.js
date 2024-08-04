@@ -2,7 +2,7 @@
 
 const crypto = require("crypto");
 const { getPrivateKey, getUUID } = require("../helpers/getKeys");
-const { handleUserLoggedInMenu } = require("../helpers/display");
+const { handleUserLoggedInMenu, handleMainMenu } = require("../helpers/display");
 
 /**
  * Handles the server response, particularly the challenge response.
@@ -12,7 +12,6 @@ const { handleUserLoggedInMenu } = require("../helpers/display");
 function handleServerResponse(data, socket) {
   try {
     const command = JSON.parse(data.toString());
-
     if (command.type === "send_challenge") {
       console.log("Challenge received");
       const { challenge, encryptedChallenge } = command.data;
@@ -45,6 +44,11 @@ function handleServerResponse(data, socket) {
     } else if (command.type === "logout_success") {
       console.log("Logged out successfully");
       socket.end();
+    } else if (command.type === "login_failure") {
+      console.log("Login failed");
+      handleMainMenu(socket);
+    } else if (command.type === "command") {
+      console.error("Error:", command.data?.command);
     }
 
   } catch (error) {

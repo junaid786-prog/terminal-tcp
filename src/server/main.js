@@ -36,7 +36,12 @@ function promptForCommand() {
         process.exit(0);
       });
     } else {
-      socketService.sendData(Buffer.from(line));
+      socketService.sendData(
+        JSON.stringify({
+          type: "command",
+          data: { command: line }
+        }),
+      );
       promptForCommand();
     }
   });
