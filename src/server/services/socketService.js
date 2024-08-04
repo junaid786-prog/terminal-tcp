@@ -21,9 +21,11 @@ class SocketService {
 
     /**
      * Sends data to all connected sockets.
-     * @param {Buffer|string} data - The data to send.
+     * @param {string} data - The data to send.
      */
     sendData(data) {
+        console.log(data);
+        
         console.info('Sending data to all connected sockets');
         this.connectedSockets.forEach(socket => socket.write(data));
     }

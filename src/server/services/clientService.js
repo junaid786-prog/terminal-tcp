@@ -63,13 +63,9 @@ class ClientService {
      * @param {Object} command - The respond challenge command containing uuid and response.
      */
     respondChallenge(command) {
-        console.log('Responding to challenge:', command);
-
         let data = command.data;
         let uuid = data.uuid;
         let response = data.response;
-        console.log('Responding to challenge:', uuid, response, this.clients);
-
         let client = this.clients.find(c => c.uuid === uuid);
 
         if (client) {

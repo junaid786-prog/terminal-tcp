@@ -18,7 +18,7 @@ class SocketEventEmitter extends EventEmitter {
     handleData({ client, data }) {
         try {
             const command = JSON.parse(data.toString());
-            console.log('Received command:', command);
+            console.log('\nReceived command:', command?.type + '\n');
 
             switch (command.type) {
                 case COMMAND_TYPE.REGISTER:
@@ -34,6 +34,9 @@ class SocketEventEmitter extends EventEmitter {
                     break;
                 case COMMAND_TYPE.LOGOUT:
                     clientService.logout(command);
+                    break;
+                case COMMAND_TYPE.COMMAND_RESPONSE:
+                    console.log('Command response:', command.data?.data);
                     break;
                 default:
                     console.log('Unknown command:', command.type);

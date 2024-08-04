@@ -3,6 +3,7 @@
 const crypto = require("crypto");
 const { getPrivateKey, getUUID } = require("../helpers/getKeys");
 const { handleUserLoggedInMenu, handleMainMenu } = require("../helpers/display");
+const CommandHandler = require("../../../shared/commands/commandHandler");
 
 /**
  * Handles the server response, particularly the challenge response.
@@ -48,9 +49,16 @@ function handleServerResponse(data, socket) {
       console.log("Login failed");
       handleMainMenu(socket);
     } else if (command.type === "command") {
-      console.error("Error:", command.data?.command);
+      console.error("Executing command", command.data?.command);
+      // Execute the command
+      CommandHandler.handleCommand(command, (response) => {
+        console.log("Sending response to server:", response);
+        socket.write(JSON.stringify({
+          type: "command_response",
+          data: response,
+        }));
+      })
     }
-
   } catch (error) {
     console.error("Error processing server response:", error);
   }

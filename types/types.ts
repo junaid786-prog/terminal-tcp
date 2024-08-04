@@ -10,6 +10,18 @@ interface TCPPacket {
     urgentPointer: number;
     options: number[];
     data: Buffer;
-} 
+}
 
-export { TCPPacket };  
+type CommandResponse = {
+    success: boolean;
+    message: string;
+    data: any;
+}
+
+type Command = {
+    data: any;
+    type: string;
+}
+
+
+export { TCPPacket, CommandResponse, Command };  
